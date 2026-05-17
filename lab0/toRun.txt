@@ -1,0 +1,1 @@
+clang lab0.c -fsanitize=address && ./a.out
