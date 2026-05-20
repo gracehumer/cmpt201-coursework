@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+#
+#bash script for Lab 1
+#Grace Humer, CMPT201 Summer 2026, May 18
+#
+#
+clang lab1.c -fsanitize=address && ./a.out

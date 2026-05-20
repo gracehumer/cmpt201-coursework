@@ -1,5 +1,7 @@
 
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include <stdlib.h>
 
 // Program in C for Lab 1: Command line text input to terminal output.
 
@@ -26,3 +28,30 @@ Tokens:
  World!
 
 And repeat */
+//
+// while != NULL
+//
+// Prompt/User Input
+//
+// Print "Tokens:"
+// For var in User Input
+//  Print var
+//
+int main() {
+  int CONT = 1;
+
+  while (CONT != 0) {
+    printf("Please enter some text: ");
+
+    char *buff = NULL;
+    char size = 0;
+    ssize_t num_char = getline(&buff, &size, stdin);
+    // ERROR IN USING getline(), not sure how to implement -> need to fix
+    printf("HERE");
+
+    free(buff);
+
+    CONT = 0;
+  }
+  return 0;
+}
