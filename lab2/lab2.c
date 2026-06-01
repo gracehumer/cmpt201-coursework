@@ -1,3 +1,4 @@
+
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,30 +16,49 @@ int main() {
   int CONT = 1;
   char *str = NULL;
   size_t str_len = 0;
-  ssize_t str_count;
 
   while (CONT) {
     puts("Enter programs to run.");
-    str_count = getline(&str, &str_len, stdin);
-    if (str_count == -1) { // Error Handling if weird input
+
+    if (getline(&str, &str_len, stdin) == -1) { // Error Handling if weird input
+
       perror("getline() failure");
       exit(EXIT_FAILURE);
+
     } else if (*str == '\n') {
+
       printf("DONE");
       CONT = 0; // Exit infinite while loop
-    } else {
+
+    } else if (1) {
+
       printf(">%s", str);
       pid_t parent = getpid();
       pid_t child = fork();
+
       if (parent == getpid()) {
+        printf("REACHED");
         int *status = NULL;
         waitpid(child > 0, status, WEXITED);
-      } else if (child == getpid()) {
-        if (execl(str, str) == -1) { // NEED TO TOKENIZE TO WORK, ISSUES WITH \n
-          perror("exec() failure");  // execl -> pass name of application to run as FIRST arg
-          exit(EXIT_FAILURE);        // fork() and interactions with waitpid()
-        }
+
+      } else if (child == -1) {
+        perror("fork failure");
+        exit(EXIT_FAILURE);
       }
+      char *ret = NULL;
+      char *hold_temp = NULL;
+      char *hold_path = NULL;
+      ret = strtok_r(str, "/", &ret);
+      printf("%s, %s, %s, %s", str, ret, hold_temp, hold_path);
+
+      while (ret != NULL) {
+        printf("HERE");
+        ret = strtok_r(NULL, "/", &ret);
+        hold_path = strcat(hold_path, hold_temp);
+        hold_temp = ret;
+      }
+      printf("%s, %s", hold_path, hold_temp);
+      execl(hold_path, hold_temp);
     }
     free(str);
     str = NULL;

@@ -3,7 +3,7 @@
 #Grace Humer, CMPT201 Summer 2026
 
 #Run Lab 2, compile all prereq files, actually run lab2 ONLY
-run: lab2 test.exe
+run: lab2
 	echo "Running: $^"
 	./lab2
 
