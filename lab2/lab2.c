@@ -9,7 +9,7 @@
 /* LAB 2
  * Program design with fork(), exec(), waitpid()
  * Grace Humer CMPT201 - Summer 2026
- * 301351393, Last Edited: May 27, 2026
+ * 301351393, Last Edited: May 31, 2026
  */
 
 int main() {
