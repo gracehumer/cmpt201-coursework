@@ -1,5 +1,6 @@
 
 #define __POSIX_C_SOURCE >= 200809L
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,12 +19,11 @@ typedef struct node {
 
 node *listTop;
 
-void addTop_node(char *strPtr); // Adds new node to list on TOP of list
-void remove_node(node *node);   // Removes single node from list, and will clear listTop if needed
-void removeLast_node();         // Removes the node at the END of the list (ie oldest)
-void removeEnd_node();          // Checks if last node in list, clears listTop if so
-void print_node(node *node);    // Prints ONLY the node that is ptr'd to
-void print_list();              // Prints ALL in list (Top -> bottom, Recent->old)
+void add_node(char *strPtr); // Adds new node to list on TOP of list
+void remove_list(void);      // frees all data from listTop linked list. Run ONCE prior main return
+void removeLast_node(void);  // Removes the node at the END of the list (ie oldest)
+void print_node(node *node); // Prints ONLY the node that is ptr'd to
+void print_list(void);       // Prints ALL in list (Top -> bottom, Recent->old)
 
 int main() {
   listTop = NULL;
@@ -32,14 +32,27 @@ int main() {
   // Infinite loop of user intput
   //  each node takes one string value -> use getline() to pull inputs,
   //  then load into 'each node' -> needs to loop actively :)
-  //  print whole list
   //
-  addTop_node(strPtr);
+  add_node(strPtr);
+  add_node(strPtr);
+  add_node(strPtr);
   print_list();
+  printf("\n");
+
+  removeLast_node();
+  print_list();
+  printf("\n");
+
+  remove_list();
+  print_list();
+
   return 0;
 }
 
-void addTop_node(char *str) {
+// Add a node to 'top' of list, change listTop to point to new node,
+// previous listTop/'head' of list becomes new node's tail ptr,
+// old node's head ALSO changes to new node.
+void add_node(char *str) {
   node *node_new = malloc(sizeof(node));
   if (node_new == NULL) {
     perror("malloc error");
@@ -54,57 +67,65 @@ void addTop_node(char *str) {
     node_new->str = str;      // save string ptr
     node_new->head = NULL;    // clear head; top of list
     node_new->tail = listTop; // set tail to be old top of list
+    listTop->head = node_new; // set old node's head ptr to be our new node
     listTop = node_new;       // set new top of list to be new node
   }
 }
 
-void remove_node(node *node) {
-  if (node->tail == NULL && node->head == NULL) {
-    removeEnd_node();
-  } else if (node->tail == NULL) {
+void remove_list() {
+  while (listTop != NULL) {
     removeLast_node();
-  } else {
-    perror("Error in remove_node");
+  }
+  if (listTop->tail != NULL && listTop->head != NULL) {
+    perror("remove_list error");
     exit(-1);
   }
 }
-
 // traverse list and remove last node
 void removeLast_node() {
   node *nodePtr = listTop;
+
   while (nodePtr->tail != NULL) {
     nodePtr = nodePtr->tail;
+  }
+  if (nodePtr == listTop) {
+    printf("HERE");
+    free(nodePtr);
+    nodePtr = NULL;
+    listTop = NULL;
   }
   nodePtr = nodePtr->head;
   free(nodePtr->tail);
   nodePtr->tail = NULL;
+
   if (nodePtr->tail != NULL) {
     perror("Error in removeLast_node");
     exit(-1);
   }
 }
 
-// when single node in list, reset list to empty ('end list')
-void removeEnd_node() {
-  if (listTop->tail == NULL && listTop->head == NULL) {
-    free(listTop);
-    listTop = NULL;
-  } else {
-    perror("Error in removeEnd_node()");
+// Print the string held by an individual node.
+void print_node(node *node) {
+  if (node->str == NULL || node == NULL) {
+    perror("print_node Error: Tried to print an empty string!");
     exit(-1);
+  } else {
+    printf(">%s\n", node->str);
   }
 }
 
-void print_node(node *node) { printf("%s :: ", node->str); }
-
+// Print All nodes saved in list, access via listTop
 void print_list() {
   node *nodeTemp = listTop;
-  printf("REACHED");
-  while (nodeTemp->tail != NULL) {
+  if (listTop == NULL) {
+    printf("print_list: No history to print");
+    return; // Exit immediately if no list to print
+  }
+  while (nodeTemp != NULL && listTop != NULL) {
+    if (nodeTemp == NULL && listTop != NULL) {
+      return;
+    }
     print_node(nodeTemp);
     nodeTemp = nodeTemp->tail;
-  }
-  if (nodeTemp == listTop && listTop != NULL) {
-    print_node(nodeTemp);
   }
 }
