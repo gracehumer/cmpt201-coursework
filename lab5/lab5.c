@@ -136,3 +136,25 @@ int find_worst_fit(struct header *free_list_ptr, uint64_t size) {
 }
 
 void print_fit(char *str, int id) { printf("The ID for %s algorithm is: %d\n", str, id); }
+
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ * Part 2: Coalescing Contiguous Free Blocks: PSEUDOCODE:
+ *
+ *    ->Function to defrag 'touching' pieces of memory
+ *    ->given an LL of free memory, returns LL of free memory (defragged)
+ * coalesce_memory()
+ *      initializeArray()           -> get array of first/last memory locations
+ *      while(current_ptr != NULL)    -> Traverse
+ *          compareAddresses()        -> using current_ptr to LL of free memory, if any addresses
+ * from array are adjacent to the current_ptr, 'reabsorb' them into memory resetCurrentPtrToLL()
+ *      while(CurrentPtr!=NULL){
+ *          assert(ptrAdjacentToFreeMemory() == NULL)
+ *      }
+ *
+ *    -> if specifc address has any free adjacent memory, combines at that location, appends to top
+ * of LL compareAddresses() while (ptrAdjacentToFreeMemory()){    ->checks array to see if any
+ * addresses are adjacent, will continue if more than SINGLE adjacent node removeNodeCur() ->which
+ * current ptr to node removeNodeOther()       ->find OTHER node/address to remove addNewNode() ->
+ * single node made from resetting size/ptrs of node w/respect to removed removed nodes
+ *    }
+ */
