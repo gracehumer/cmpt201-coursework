@@ -1,24 +1,25 @@
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ASSERT(expr)                                                           \
-  {                                                                            \
-    if (!(expr)) {                                                             \
-      fprintf(stderr, "Assertion failed: %s\n", #expr);                        \
-      exit(1);                                                                 \
-    }                                                                          \
+#define ASSERT(expr)                                                                               \
+  {                                                                                                \
+    if (!(expr)) {                                                                                 \
+      fprintf(stderr, "Assertion failed: %s\n", #expr);                                            \
+      exit(1);                                                                                     \
+    }                                                                                              \
   }
 
-#define TEST(expr)                                                             \
-  {                                                                            \
-    if (!(expr)) {                                                             \
-      fprintf(stderr, "Test failed: %s\n", #expr);                             \
-      exit(1);                                                                 \
-    } else {                                                                   \
-      printf("Test passed: %s\n", #expr);                                      \
-    }                                                                          \
+#define TEST(expr)                                                                                 \
+  {                                                                                                \
+    if (!(expr)) {                                                                                 \
+      fprintf(stderr, "Test failed: %s\n", #expr);                                                 \
+      exit(1);                                                                                     \
+    } else {                                                                                       \
+      printf("Test passed: %s\n", #expr);                                                          \
+    }                                                                                              \
   }
 
 typedef struct node {
@@ -40,14 +41,23 @@ void insert_sorted(uint64_t data) {
     node_t *prev = NULL;
 
     bool inserted = false;
-    while (curr != NULL && !inserted) {
-      if (data < curr->data) {
+
+    if (data < head->data) {
+      new_node->next = head;
+      head = new_node;
+      inserted = true;
+    }
+
+    while (!inserted) {
+      if (curr == NULL || data < curr->data) {
         prev->next = new_node;
         new_node->next = curr;
         inserted = true;
       }
-      prev = curr;
-      curr = curr->next;
+      if (curr != NULL) {
+        prev = curr;
+        curr = curr->next;
+      }
     }
   }
 }
