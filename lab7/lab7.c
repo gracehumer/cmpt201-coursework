@@ -58,7 +58,7 @@ int main() {
   // Step 1: Map Phase
 
   IntermediateInput mapped_results[MAX_INPUT] = {0};
-  printInput(input_data, input_size);
+  //  printInput(input_data, input_size);
 
   for (int i = 0; i < input_size; i++) {
     map(&input_data[i], &mapped_results[i]);
@@ -68,7 +68,7 @@ int main() {
 
   Output output_results[MAX_INPUT] = {0};
   int result_count = 0;
-  printIntermediateInput(mapped_results, input_size);
+  // printIntermediateInput(mapped_results, input_size);
 
   for (int i = 0; i < input_size; i++) {
     groupByKey(&mapped_results[i], output_results, &result_count);
@@ -117,11 +117,15 @@ void groupByKey(IntermediateInput *input, Output *output, int *result_count) {
 
 void reduce(Output *output) {
   // Print the doubled number and the line numbers
-  printf("%d\t", output->doubled_value);
+  printf("(%d, [", output->doubled_value);
   for (int j = 0; j < output->count; j++) {
-    printf("%d ", output->line_numbers[j]);
+    printf("%d", output->line_numbers[j]);
+    if (output->line_numbers[j + 1] != '\0') {
+      printf(", ");
+    } else {
+      printf("])\n");
+    }
   }
-  printf("\n");
 }
 
 void printInput(Input *input, int input_size) {
