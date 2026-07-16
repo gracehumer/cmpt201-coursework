@@ -1,8 +1,9 @@
 // Lab 8 - Starting Code for sorting data in threads using uthash
-#include "uthash.h"
+#include "../include/uthash.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define THREAD_COUNT 3
 typedef const char *word_t;
 
@@ -30,8 +31,11 @@ static void add_word_counts_in_chunk(count_map_t *map, word_t *words, size_t num
                                      pthread_mutex_t *lock) {
   // --------- Task 4 --------- \\
   // Make this function thread-safe by using the lock
-
   for (size_t i = 0; i < num_words; i++) {
+    if (lock) {
+      pthread_mutex_lock(lock);
+    }
+    // Lock BEFORE accessing/modifying shared data
     word_count_entry_t *w = NULL;
     HASH_FIND_STR(*map, words[i], w);
 
@@ -40,6 +44,10 @@ static void add_word_counts_in_chunk(count_map_t *map, word_t *words, size_t num
     } else {
       w = create_entry(words[i], 1);
       HASH_ADD_STR(*map, word, w);
+    }
+
+    if (lock) {
+      pthread_mutex_unlock(lock);
     }
   }
 }
@@ -57,35 +65,43 @@ static count_map_t count_words_parallel(word_t *words, size_t num_words) {
   count_map_t map = NULL;
   pthread_mutex_t count_mutex;
 
+  if (pthread_mutex_init(&count_mutex, NULL) != 0) {
+    perror("pthread_mutex_init");
+    exit(EXIT_FAILURE);
+  }
+
   pthread_t threads[THREAD_COUNT];
   count_thread_args_t *threads_args[THREAD_COUNT];
 
   size_t chunk_size = num_words / THREAD_COUNT;
+  word_t *temp = words;
   // perform initialization
-  pthread_attr_t attr;
-  if (pthread_attr_init(&attr) != 0) {
-    perror("pthread_attr_init");
-    exit(EXIT_FAILURE);
-  }
-
   // Launch threads
   for (size_t i = 0; i < THREAD_COUNT; i++) {
-    word_t *thread_arg_words = words + i * chunk_size;
+    word_t *thread_arg_words = temp + (i * chunk_size);
     size_t thread_arg_num_words =
         chunk_size + (i == THREAD_COUNT - 1 ? num_words % THREAD_COUNT : 0);
+
     // prepare arguments and launch threads
     threads_args[i] = pack_args(&map, thread_arg_words, thread_arg_num_words, &count_mutex);
-    threads[i] = pthread_create(&threads[i], &attr, counter_thread_func, &threads_args[i]);
+    if (pthread_create(&threads[i], NULL, counter_thread_func, threads_args[i]) != 0) {
+      perror("pthread_create");
+      exit(EXIT_FAILURE);
+    }
   }
 
   // Wait for threads to finish
-  // Cleanup
-  for (int k = 0; k < THREAD_COUNT; k++) {
+  for (size_t k = 0; k < THREAD_COUNT; k++) {
     pthread_join(threads[k], NULL);
-    free(threads_args[k]);
-    threads_args[k] = NULL;
   }
-  printf("HERE");
+  pthread_mutex_destroy(&count_mutex);
+
+  // Clean up
+  for (size_t j = 0; j < THREAD_COUNT; j++) {
+    free(threads_args[j]);
+    threads_args[j] = NULL;
+  }
+
   return map;
 }
 
@@ -107,9 +123,10 @@ void print_counts(count_map_t);
 void delete_table(count_map_t);
 
 int main(void) {
-  word_t words_in[13] = {"the",  "quick", "brown", "fox", "jumps", "over", "the",
-                         "lazy", "dog",   "the",   "the", "fox",   "brown"};
-  const size_t words_in_len = 13;
+  word_t words_in[18] = {"the",   "quick", "brown", "fox",   "jumps", "over",
+                         "the",   "lazy",  "dog",   "the",   "the",   "fox",
+                         "brown", "brown", "brown", "brown", "brown", "brown"};
+  const size_t words_in_len = 18;
   count_map_t word_map = NULL;
 
   // Task 2: Replace this function call with the parallelized version.
@@ -168,6 +185,10 @@ count_thread_args_t *pack_args(count_map_t *map, word_t *words, size_t num_words
 static void *counter_thread_func(void *param) {
   // Call count_words_in_chunk with the appropriate arguments
   count_thread_args_t *args = (count_thread_args_t *)param;
+  if (args == NULL) {
+    perror("counter_thread_func");
+    exit(EXIT_FAILURE);
+  }
   add_word_counts_in_chunk(args->map, args->words, args->num_words, args->lock);
 
   return NULL;

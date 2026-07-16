@@ -6,5 +6,5 @@ C_DEFINES =
 
 C_INCLUDES = -I/home/cmpt201/units/cmpt201-coursework/lab8/include
 
-C_FLAGS = -g -fsanitize=address -g -O1
+C_FLAGS = -g -fsanitize=thread -g -O1
 

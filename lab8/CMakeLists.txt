@@ -10,14 +10,13 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # Note: ASan and TSan are incompatible
 # Address sanitization:
-add_compile_options(-fsanitize=address -g -O1) 
-add_link_options(-fsanitize=address -g -O1)
+#add_compile_options(-fsanitize=address -g -O1) 
+#add_link_options(-fsanitize=address -g -O1)
 # --------- Task 3 ---------
 # Enable the thread sanitizer 
-# TODO
 
-#add_compile_options(-pthread)
-#add_link_options(-pthread)
+add_compile_options(-fsanitize=thread -g -O1)
+add_link_options(-fsanitize=thread -g -O1)
 
 add_executable(main src/lab8.c)
 target_include_directories(main PRIVATE include)
