@@ -62,26 +62,30 @@ static count_map_t count_words_parallel(word_t *words, size_t num_words) {
 
   size_t chunk_size = num_words / THREAD_COUNT;
   // perform initialization
-  pthread_mutex_init(&count_mutex, NULL);
+  pthread_attr_t attr;
+  if (pthread_attr_init(&attr) != 0) {
+    perror("pthread_attr_init");
+    exit(EXIT_FAILURE);
+  }
 
   // Launch threads
   for (size_t i = 0; i < THREAD_COUNT; i++) {
     word_t *thread_arg_words = words + i * chunk_size;
     size_t thread_arg_num_words =
         chunk_size + (i == THREAD_COUNT - 1 ? num_words % THREAD_COUNT : 0);
-    // TODO: prepare arguments and launch threads
+    // prepare arguments and launch threads
     threads_args[i] = pack_args(&map, thread_arg_words, thread_arg_num_words, &count_mutex);
-    threads[i] = pthread_create(threads[i], counter_thread_func(threads_args[i]));
+    threads[i] = pthread_create(&threads[i], &attr, counter_thread_func, &threads_args[i]);
   }
 
-  // TODO: Wait for threads to finish
-  // TODO: Cleanup
+  // Wait for threads to finish
+  // Cleanup
   for (int k = 0; k < THREAD_COUNT; k++) {
     pthread_join(threads[k], NULL);
     free(threads_args[k]);
     threads_args[k] = NULL;
   }
-
+  printf("HERE");
   return map;
 }
 
